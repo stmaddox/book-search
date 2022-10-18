@@ -6,16 +6,17 @@ const resolvers = {
   Query: {
     me: async (parent, args, context) => {
       if (context.user) {
-        const userData = await User.findOne({
-          _id: context.user._id,
-        });
-        //   .select("-_v -password")
-        //   .populate("books");
+        const userData = await User.findOne({ _id: context.user._id }).select(
+          "-_v -password"
+        );
 
         return userData;
       }
       throw new AuthenticationError("Not logged in!");
     },
+    // users: async () => {
+    //   return User.find().select("-_v -password").populate("book");
+    // },
   },
 
   Mutation: {
@@ -31,7 +32,10 @@ const resolvers = {
       if (!user) {
         throw new AuthenticationError("Incorrect credentials!");
       }
-      if (!password) {
+
+      const correctPw = await user.isCorrectPassword(password);
+
+      if (!correctPw) {
         throw new AuthenticationError("Incorrect credentials!");
       }
       const token = signToken(user);
@@ -41,7 +45,7 @@ const resolvers = {
       if (context.user) {
         const updateBookList = await User.findOneAndUpdate(
           { _id: context.user._id },
-          { $push: { savedBooks: bookData } },
+          { $addToSet: { savedBooks: bookData } },
           { new: true, runValidators: true }
         );
         return updateBookList;
@@ -53,7 +57,7 @@ const resolvers = {
       if (context.user) {
         const updateBookList = await User.findOneAndUpdate(
           { id: context.user._id },
-          { $pull: { savedBooks: bookData } },
+          { $pull: { savedBooks: { bookData } } },
           { new: true }
         );
         return updateBookList;
