@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Form, Button, Alert } from "react-bootstrap";
 import { LOGIN } from "../utils/mutations";
-import { loginUser } from "../utils/API";
+// import { login } from "../utils/API";
 import Auth from "../utils/auth";
 import { useMutation } from "@apollo/client";
 
@@ -99,6 +99,7 @@ const LoginForm = () => {
           Submit
         </Button>
       </Form>
+      {error && <div>You did not log in! Please try again!</div>}
     </>
   );
 };
