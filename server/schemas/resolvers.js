@@ -38,24 +38,26 @@ const resolvers = {
     },
     saveBook: async (parent, { bookData }, context) => {
       if (context.user) {
-        const book = await User.findOneAndUpdate(
+        const bookData = bookData.args;
+        if (!bookData) {
+          throw new Error("No book found");
+        }
+        return User.findOneAndUpdate(
           { _id: context.user._id },
           { $addToSet: { savedBooks: bookData } },
           { new: true, runValidators: true }
         );
-        return book;
       }
 
       throw new AuthenticationError("You need to be logged in!");
     },
     removeBook: async (parent, { bookId }, context) => {
       if (context.user) {
-        const book = await User.findOneAndUpdate(
+        return User.findOneAndUpdate(
           { id: context.user._id },
           { $pull: { savedBooks: { bookId } } },
           { new: true }
         );
-        return book;
       }
 
       throw new AuthenticationError("You need to be logged in!");
